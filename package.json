@@ -1,0 +1,48 @@
+/**
+ * localStorage shim for window.storage
+ * Mirrors the same async API used inside the Claude artifact:
+ *   window.storage.get(key)    → { key, value } | null
+ *   window.storage.set(key, v) → { key, value }
+ *   window.storage.delete(key) → { key, deleted: true }
+ *   window.storage.list(prefix) → { keys }
+ */
+const storage = {
+  async get(key) {
+    try {
+      const value = localStorage.getItem(key)
+      if (value === null) return null
+      return { key, value }
+    } catch {
+      return null
+    }
+  },
+
+  async set(key, value) {
+    try {
+      localStorage.setItem(key, value)
+      return { key, value }
+    } catch {
+      return null
+    }
+  },
+
+  async delete(key) {
+    try {
+      localStorage.removeItem(key)
+      return { key, deleted: true }
+    } catch {
+      return null
+    }
+  },
+
+  async list(prefix = '') {
+    try {
+      const keys = Object.keys(localStorage).filter(k => k.startsWith(prefix))
+      return { keys }
+    } catch {
+      return { keys: [] }
+    }
+  },
+}
+
+window.storage = storage
